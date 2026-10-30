@@ -57,7 +57,7 @@ DSH Desktop：**设置 → 插件 → 添加插件**，填包名或仓库地址�
 
 ```
 dsh-effort-slider-universal
-github:OWNER/dsh-effort-slider-universal
+github:AkiNoYo-desu/dsh-effort-slider-universal
 ```
 
 装完**完全退出并重开** DSH Desktop（只关窗口不够，宿主在启动时把插件读进内存）。

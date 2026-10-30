@@ -11,12 +11,14 @@ cd "${ROOT}"
 TARGET="${1:-dshopen}"
 REPO_NAME="dsh-effort-slider-universal"
 
-command -v gh >/dev/null 2>&1 || { echo "[x] 没装 gh：brew install gh && gh auth login"; exit 1; }
-gh auth status >/dev/null 2>&1 || { echo "[x] gh 未登录：gh auth login"; exit 1; }
-OWNER="$(gh api user --jq .login)"
+GH_BIN="$(command -v gh || true)"
+[ -z "${GH_BIN}" ] && [ -x "${HOME}/.local/bin/gh" ] && GH_BIN="${HOME}/.local/bin/gh"
+[ -n "${GH_BIN}" ] || { echo "[x] 没装 gh"; exit 1; }
+"${GH_BIN}" auth status >/dev/null 2>&1 || { echo "[x] gh 未登录：${GH_BIN} auth login"; exit 1; }
+OWNER="$("${GH_BIN}" api user --jq .login)"
 VERSION="$(python3 -c 'import json;print(json.load(open("package.json"))["version"])')"
 
-if ! gh repo view "${OWNER}/${REPO_NAME}" >/dev/null 2>&1; then
+if ! "${GH_BIN}" repo view "${OWNER}/${REPO_NAME}" >/dev/null 2>&1; then
   echo "[x] 还没建仓库 ${OWNER}/${REPO_NAME}，先跑 ./scripts/publish.sh"
   exit 1
 fi
@@ -46,7 +48,7 @@ case "${TARGET}" in
 - 与上游的区别（避免与已有条目重复）：上游只在目录声明了档位的模型上出现滑条；本包在未声明档位时自建行 + 合成档位，并明确提示 provider 拒绝
 EOF
 )"
-    URL="$(gh issue create --repo polang233/dsh-plugin-index \
+    URL="$("${GH_BIN}" issue create --repo polang233/dsh-plugin-index \
       --title "[plugin-add] ${REPO_NAME}" --body "${BODY}")"
     echo "[ok] 上架申请：${URL}"
     echo "     索引每 6 小时构建一次；审核通过后 dshopen.org 与 DSH 的「发现」里就能搜到。"
@@ -57,17 +59,17 @@ EOF
     UPSTREAM="awesome-dsh-plugin/awesome-dsh-plugin"
     python3 -c 'import json,sys;d=json.load(open("package.json"));sys.exit(0 if d.get("dsh",{}).get("bundle",{}).get("patch") else 1)' \
       || { echo "[x] package.json 没声明 dsh.bundle.patch，会被拒"; exit 1; }
-    CREATED="$(gh api "repos/${OWNER}/${REPO_NAME}" --jq .created_at)"
+    CREATED="$("${GH_BIN}" api "repos/${OWNER}/${REPO_NAME}" --jq .created_at)"
     echo "[i] 仓库创建时间 ${CREATED}（CI 要求满 24 小时，未满会拦）"
 
-    gh repo fork "${UPSTREAM}" --clone=false >/dev/null 2>&1 || true
-    for _ in 1 2 3 4 5 6; do gh api "repos/${OWNER}/awesome-dsh-plugin" >/dev/null 2>&1 && break; sleep 2; done
-    gh api "repos/${OWNER}/awesome-dsh-plugin" >/dev/null 2>&1 || { echo "[x] fork 未就绪，稍后重跑"; exit 1; }
+    "${GH_BIN}" repo fork "${UPSTREAM}" --clone=false >/dev/null 2>&1 || true
+    for _ in 1 2 3 4 5 6; do "${GH_BIN}" api "repos/${OWNER}/awesome-dsh-plugin" >/dev/null 2>&1 && break; sleep 2; done
+    "${GH_BIN}" api "repos/${OWNER}/awesome-dsh-plugin" >/dev/null 2>&1 || { echo "[x] fork 未就绪，稍后重跑"; exit 1; }
 
-    BASE_BRANCH="$(gh api "repos/${UPSTREAM}" --jq .default_branch)"
-    BASE_SHA="$(gh api "repos/${OWNER}/awesome-dsh-plugin/git/ref/heads/${BASE_BRANCH}" --jq .object.sha)"
+    BASE_BRANCH="$("${GH_BIN}" api "repos/${UPSTREAM}" --jq .default_branch)"
+    BASE_SHA="$("${GH_BIN}" api "repos/${OWNER}/awesome-dsh-plugin/git/ref/heads/${BASE_BRANCH}" --jq .object.sha)"
     BRANCH="add-${REPO_NAME}-$(date +%Y%m%d-%H%M%S)"
-    gh api --method POST "repos/${OWNER}/awesome-dsh-plugin/git/refs" \
+    "${GH_BIN}" api --method POST "repos/${OWNER}/awesome-dsh-plugin/git/refs" \
       -f "ref=refs/heads/${BRANCH}" -f "sha=${BASE_SHA}" >/dev/null
 
     ENTRY_PATH="data/plugins/${OWNER}__${REPO_NAME}.yml"
@@ -75,7 +77,7 @@ EOF
     sed "s/OWNER/${OWNER}/g" submission/template.yml > "${tmp}"
     CONTENT_B64="$(base64 < "${tmp}" | tr -d '\n')"
     rm -f "${tmp}"
-    gh api --method PUT "repos/${OWNER}/awesome-dsh-plugin/contents/${ENTRY_PATH}" \
+    "${GH_BIN}" api --method PUT "repos/${OWNER}/awesome-dsh-plugin/contents/${ENTRY_PATH}" \
       -f "message=Add ${OWNER}/${REPO_NAME}" -f "content=${CONTENT_B64}" -f "branch=${BRANCH}" >/dev/null
     echo "[i] 已写入 ${ENTRY_PATH}"
 
@@ -93,7 +95,7 @@ Adds \`${OWNER}/${REPO_NAME}\`.
 **Upstream**: MIT fork of Microqian2th/dsh-codex-effort-slider 1.1.4; original copyright preserved in LICENSE.
 EOF
 )"
-    PR_URL="$(gh pr create --repo "${UPSTREAM}" --head "${OWNER}:${BRANCH}" --base "${BASE_BRANCH}" \
+    PR_URL="$("${GH_BIN}" pr create --repo "${UPSTREAM}" --head "${OWNER}:${BRANCH}" --base "${BASE_BRANCH}" \
       --title "Add ${OWNER}/${REPO_NAME}" --body "${PR_BODY}")"
     echo "[ok] PR：${PR_URL}"
     ;;

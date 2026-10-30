@@ -6,12 +6,12 @@
   "author": "dsh-effort-slider-universal contributors",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/OWNER/dsh-effort-slider-universal.git"
+    "url": "git+https://github.com/AkiNoYo-desu/dsh-effort-slider-universal.git"
   },
   "bugs": {
-    "url": "https://github.com/OWNER/dsh-effort-slider-universal/issues"
+    "url": "https://github.com/AkiNoYo-desu/dsh-effort-slider-universal/issues"
   },
-  "homepage": "https://github.com/OWNER/dsh-effort-slider-universal#readme",
+  "homepage": "https://github.com/AkiNoYo-desu/dsh-effort-slider-universal#readme",
   "keywords": [
     "dsh",
     "dsh-plugin",
