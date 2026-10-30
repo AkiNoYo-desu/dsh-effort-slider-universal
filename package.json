@@ -1,0 +1,55 @@
+{
+  "name": "dsh-effort-slider-universal",
+  "version": "2.0.0",
+  "description": "Universal reasoning-effort slider for DeepSeek Harness: turns the model menu's effort row into one draggable slider that shows up for every provider and model, not just DeepSeek.",
+  "license": "MIT",
+  "author": "dsh-effort-slider-universal contributors",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/OWNER/dsh-effort-slider-universal.git"
+  },
+  "bugs": {
+    "url": "https://github.com/OWNER/dsh-effort-slider-universal/issues"
+  },
+  "homepage": "https://github.com/OWNER/dsh-effort-slider-universal#readme",
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "reasoning-effort",
+    "slider",
+    "ui",
+    "universal"
+  ],
+  "type": "module",
+  "main": "./lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./client": "./lib/client.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib/index.js",
+    "lib/client.js",
+    "cordis.patch.yml",
+    "LICENSE",
+    "README.md",
+    "assets",
+    "test"
+  ],
+  "scripts": {
+    "test": "node test/client.test.mjs"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": true
+    }
+  }
+}
