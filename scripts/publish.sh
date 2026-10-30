@@ -76,12 +76,14 @@ echo "[i] 已加 topics: dsh-plugin / dsh / deepseek-harness"
 
 # ── 5. npm 包（Release 附件 + 可选 registry）─────────────────────────────
 mkdir -p dist
-"${NODE_BIN:-npm}" >/dev/null 2>&1 || true
+TGZ="dist/${REPO_NAME}-${VERSION}.tgz"
 if command -v npm >/dev/null 2>&1; then
   npm pack --pack-destination dist >/dev/null
-  TGZ="dist/${REPO_NAME}-${VERSION}.tgz"
   echo "[i] 打包：${TGZ}"
+elif [ -f "${TGZ}" ]; then
+  echo "[i] 沿用已生成的 tarball：${TGZ}"
 else
+  echo "[!] 没有 npm 也没有现成 tarball，Release 将不带附件"
   TGZ=""
 fi
 
