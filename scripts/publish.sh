@@ -91,9 +91,13 @@ else
   TGZ=""
 fi
 
-if [ "${DO_NPM}" -eq 1 ] && NPM_BIN="$(command -v npm || true)"
-[ -z "${NPM_BIN}" ] && for c in "${HOME}"/.dsh/mcp/rea/node-runtime/*/bin/npm "${HOME}"/.dsh/dsh-runtimes/*/dependencies/node/bin/npm; do [ -x "${c}" ] && NPM_BIN="${c}" && break; done
-"${NPM_BIN:-npm}" whoami >/dev/null 2>&1; then
+NPM_BIN="${NPM_BIN:-$(command -v npm || true)}"
+if [ -z "${NPM_BIN}" ]; then
+  for c in "${HOME}"/.dsh/mcp/rea/node-runtime/*/bin/npm "${HOME}"/.dsh/dsh-runtimes/*/dependencies/node/bin/npm; do
+    [ -x "${c}" ] && NPM_BIN="${c}" && break
+  done
+fi
+if [ "${DO_NPM}" -eq 1 ] && [ -n "${NPM_BIN}" ] && "${NPM_BIN}" whoami >/dev/null 2>&1; then
   echo "[..] npm publish"
   "${NPM_BIN}" publish --access public || echo "[!] npm 发布失败（可稍后手动 npm publish）"
 else
